@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #define DIMENSION 50
+#define ITERATIONS 10
 
 // Define the original and copy grids as global 2D arrays of float pointers
 float* originalGrid[DIMENSION][DIMENSION];
@@ -111,6 +112,42 @@ int getNeighbors(float* whichGrid[DIMENSION][DIMENSION], int i, int j) {
         amountLivingNeighbors += arrNeighbors[k];
     }
     return amountLivingNeighbors;
+}
+
+int countLivingCells(float* whichGrid[DIMENSION][DIMENSION], int i, int j) {
+    //  TODO
+    // For loop that iterate thought all the grid and returns the sum
+    // of += grid[i][j] value
+
+    /* Rule based on topic 5.
+        Crie um procedimento (ou trecho de código) que, ao finalizar todas as
+        iterações/gerações, compute a quantidade de células vivas.
+        ATENCAO: Considere que uma célula viva tem seu valor maior que zero.
+    */
+}
+
+void validateGameRules() {
+    // TODO
+    /* Rule based on Rules:
+        A) Células vivas com menos de 2 (dois) vizinhas vivas morrem por abandono;
+        B) Cada célula viva com 2 (dois) ou 3 (três) vizinhos deve permanecer viva para a
+        próxima geração; 
+        C) Cada célula viva com 4 (quatro) ou mais vizinhos morre por
+        superpopulação; 
+        D) Cada célula morta com exatamente 3 (três) vizinhos deve se
+        tornar viva.
+    */
+}
+
+void lifeGameIterator() {
+    // TODO
+    //
+    /* Rule based on topic 4.
+       Crie um laço de repetição para executar um determinado número máximo de
+       iterações do jogo, ou seja, determine a quantidade de gerações sucessivas
+       do tabuleiro que devem ser geradas.
+     */
+    // USE VARIABLE: ITERATIONS (defined at line 5)
 }
 
 int main() {
