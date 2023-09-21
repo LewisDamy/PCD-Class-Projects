@@ -155,8 +155,6 @@ int main() {
     initGrid(originalGrid);
     initGrid(copyGrid);
 
-    // printf("cell value: %f\n", *originalGrid[0][1]);
-
     int result = getNeighbors(originalGrid, 1, 2);
     printf("result: %i\n", result);
 
