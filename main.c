@@ -5,15 +5,19 @@
 #define ITERATIONS 10
 
 // Define the original and copy grids as global 2D arrays of float pointers
-float* originalGrid[DIMENSION][DIMENSION];
-float* copyGrid[DIMENSION][DIMENSION];
+float *originalGrid[DIMENSION][DIMENSION];
+float *copyGrid[DIMENSION][DIMENSION];
 
-void initGrid(float* grid[DIMENSION][DIMENSION]) {
+void initGrid(float *grid[DIMENSION][DIMENSION])
+{
     // Allocate memory for the grid
-    for (int i = 0; i < DIMENSION; i++) {
-        for (int j = 0; j < DIMENSION; j++) {
-            grid[i][j] = (float*)malloc(sizeof(float));
-            if (grid[i][j] == NULL) {
+    for (int i = 0; i < DIMENSION; i++)
+    {
+        for (int j = 0; j < DIMENSION; j++)
+        {
+            grid[i][j] = (float *)malloc(sizeof(float));
+            if (grid[i][j] == NULL)
+            {
                 fprintf(stderr, "Memory allocation failed.\n");
                 exit(1);
             }
@@ -40,54 +44,69 @@ void initGrid(float* grid[DIMENSION][DIMENSION]) {
     *grid[line + 2][column + 1] = 1.0;
 }
 
-void displayGrid(float* grid[DIMENSION][DIMENSION]) {
-    FILE* file = fopen("display.txt", "w");
+void displayGrid(float *grid[DIMENSION][DIMENSION])
+{
+    // FILE* file = fopen("display.txt", "w");
+    FILE *file = fopen("display.txt", "wb"); // windows
 
-    if (file == NULL) {
+    if (file == NULL)
+    {
         printf("Error opening the file.\n");
         return;
     }
 
     fprintf(file, "      ");
-    for (int j = 1; j <= DIMENSION; j++) {
+    for (int j = 1; j <= DIMENSION; j++)
+    {
         fprintf(file, "[%02d]  ", j);
     }
     fprintf(file, "\n");
 
-    for (int i = 1; i <= DIMENSION; i++) {
+    for (int i = 1; i <= DIMENSION; i++)
+    {
         fprintf(file, "[%02d]  ", i);
-        for (int j = 1; j <= DIMENSION; j++) {
+        for (int j = 1; j <= DIMENSION; j++)
+        {
             fprintf(file, "%.1f   ", *grid[i - 1][j - 1]);
         }
-        fprintf(file, "\n");
+        // fprintf(file, "\n");
+        fprintf(file, "\r\n"); // windows
     }
 
     fclose(file);
 }
 
 // Function to copy data from the original grid to the copy grid
-void copyOriginalToCopy() {
-    for (int i = 0; i < DIMENSION; i++) {
-        for (int j = 0; j < DIMENSION; j++) {
+void copyOriginalToCopy()
+{
+    for (int i = 0; i < DIMENSION; i++)
+    {
+        for (int j = 0; j < DIMENSION; j++)
+        {
             *copyGrid[i][j] = *originalGrid[i][j];
         }
     }
 }
 
 // Function to copy data from the copy grid to the original grid
-void copyCopyToOriginal() {
-    for (int i = 0; i < DIMENSION; i++) {
-        for (int j = 0; j < DIMENSION; j++) {
+void copyCopyToOriginal()
+{
+    for (int i = 0; i < DIMENSION; i++)
+    {
+        for (int j = 0; j < DIMENSION; j++)
+        {
             *originalGrid[i][j] = *copyGrid[i][j];
         }
     }
 }
 
-void printCell(float* whichGrid[DIMENSION][DIMENSION], int i, int j) {
+void printCell(float *whichGrid[DIMENSION][DIMENSION], int i, int j)
+{
     printf("cell value: %0.1f\n", *whichGrid[0][1]);
 }
 
-int getNeighbors(float* whichGrid[DIMENSION][DIMENSION], int i, int j) {
+int getNeighbors(float *whichGrid[DIMENSION][DIMENSION], int i, int j)
+{
     float arrNeighbors[8];
     int amountLivingNeighbors = 0;
 
@@ -95,51 +114,64 @@ int getNeighbors(float* whichGrid[DIMENSION][DIMENSION], int i, int j) {
     int neighborX[] = {-1, -1, -1, 0, 0, 1, 1, 1};
     int neighborY[] = {-1, 0, 1, -1, 1, -1, 0, 1};
 
-    if (i == 0 || j == 0) {
-        for (int k = 0; k < 8; k++) {
+    if (i == 0 || j == 0)
+    {
+        for (int k = 0; k < 8; k++)
+        {
             int x = (i + neighborX[k] + DIMENSION) % DIMENSION;
             int y = (j + neighborY[k] + DIMENSION) % DIMENSION;
             arrNeighbors[k] = *whichGrid[x][y];
         }
-    } else {
-        for (int k = 0; k < 8; k++) {
+    }
+    else
+    {
+        for (int k = 0; k < 8; k++)
+        {
             int x = i + neighborX[k];
             int y = j + neighborY[k];
             arrNeighbors[k] = *whichGrid[x][y];
         }
     }
-    for (int k = 0; k < 8; k++) {
+    for (int k = 0; k < 8; k++)
+    {
         amountLivingNeighbors += arrNeighbors[k];
     }
     return amountLivingNeighbors;
 }
 
-int countLivingCells(float* whichGrid[DIMENSION][DIMENSION], int i, int j) {
-    //  TODO
-    // For loop that iterate thought all the grid and returns the sum
-    // of += grid[i][j] value
-
-    /* Rule based on topic 5.
-        Crie um procedimento (ou trecho de código) que, ao finalizar todas as
-        iterações/gerações, compute a quantidade de células vivas.
-        ATENCAO: Considere que uma célula viva tem seu valor maior que zero.
-    */
+int countLivingCells(float *whichGrid[DIMENSION][DIMENSION], int i, int j)
+{
+    int livingCells = 0;
+    int x, y;
+    for (int x = i; x < DIMENSION; x++)
+    {
+        for (int y = j; y < DIMENSION; y++)
+        {
+            if (*whichGrid[x][y] > 0.0)
+            {
+                livingCells++;
+            }
+        }
+    }
+    return livingCells;
 }
 
-void validateGameRules() {
+void validateGameRules()
+{
     // TODO
     /* Rule based on Rules:
         A) Células vivas com menos de 2 (dois) vizinhas vivas morrem por abandono;
         B) Cada célula viva com 2 (dois) ou 3 (três) vizinhos deve permanecer viva para a
-        próxima geração; 
+        próxima geração;
         C) Cada célula viva com 4 (quatro) ou mais vizinhos morre por
-        superpopulação; 
+        superpopulação;
         D) Cada célula morta com exatamente 3 (três) vizinhos deve se
         tornar viva.
     */
 }
 
-void lifeGameIterator() {
+void lifeGameIterator()
+{
     // TODO
     //
     /* Rule based on topic 4.
@@ -150,13 +182,16 @@ void lifeGameIterator() {
     // USE VARIABLE: ITERATIONS (defined at line 5)
 }
 
-int main() {
+int main()
+{
     // Initialize the original and copy grids
     initGrid(originalGrid);
     initGrid(copyGrid);
-
+    // displayGrid(originalGrid);
     int result = getNeighbors(originalGrid, 1, 2);
+    int livingCells = countLivingCells(originalGrid, 0, 0);
     printf("result: %i\n", result);
+    printf("living cells: %d", livingCells);
 
     return 0;
 }
