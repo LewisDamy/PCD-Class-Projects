@@ -126,17 +126,27 @@ int countLivingCells(float* whichGrid[DIMENSION][DIMENSION], int i, int j) {
     */
 }
 
-void validateGameRules() {
-    // TODO
-    /* Rule based on Rules:
-        A) Células vivas com menos de 2 (dois) vizinhas vivas morrem por abandono;
-        B) Cada célula viva com 2 (dois) ou 3 (três) vizinhos deve permanecer viva para a
-        próxima geração; 
-        C) Cada célula viva com 4 (quatro) ou mais vizinhos morre por
-        superpopulação; 
-        D) Cada célula morta com exatamente 3 (três) vizinhos deve se
-        tornar viva.
-    */
+void validateGameRules(float* grid[DIMENSION][DIMENSION], int x, int y) {
+   // se a célula está viva
+    if (*grid[x][y] > 0.0) {
+        // A. Células vivas com menos de 2 vizinhas vivas morrem por abandono
+        if (liveNeighbors < 2) {
+            *newGrid[x][y] = 0.0; // morte por abandono
+        }
+        // B. Células vivas com 2 ou 3 vizinhos devem permanecer vivas
+        else if (liveNeighbors == 2 || liveNeighbors == 3) {
+            *newGrid[x][y] = 1.0; // permanece viva
+        }
+        // C. Células vivas com 4 ou mais vizinhos morrem por superpopulação
+        else if (liveNeighbors >= 4) {
+            *newGrid[x][y] = 0.0; // morte por superpopulação
+        }
+    } else {
+        // D. Célula morta com exatamente 3 vizinhos se tornam vivas
+        if (liveNeighbors == 3) {
+            *newGrid[x][y] = 1.0; // vive
+        }
+    }
 }
 
 void lifeGameIterator() {
