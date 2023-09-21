@@ -101,7 +101,7 @@ int getNeighbors(float* whichGrid[DIMENSION][DIMENSION], int i, int j) {
             int y = (j + neighborY[k] + DIMENSION) % DIMENSION;
             arrNeighbors[k] = *whichGrid[x][y];
 
-            // printf("[%i][%i] = %f\n", x, y, *whichGrid[x][y]);
+            // printf("[%i][%i] = %f\n", x, y, *whichGrid[x][y]); 
         }
     } else {
         // printf("entrou no else\n");
