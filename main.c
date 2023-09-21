@@ -95,26 +95,19 @@ int getNeighbors(float* whichGrid[DIMENSION][DIMENSION], int i, int j) {
     int neighborY[] = {-1, 0, 1, -1, 1, -1, 0, 1};
 
     if (i == 0 || j == 0) {
-        // printf("entrou no if\n");
         for (int k = 0; k < 8; k++) {
             int x = (i + neighborX[k] + DIMENSION) % DIMENSION;
             int y = (j + neighborY[k] + DIMENSION) % DIMENSION;
             arrNeighbors[k] = *whichGrid[x][y];
-
-            // printf("[%i][%i] = %f\n", x, y, *whichGrid[x][y]); 
         }
     } else {
-        // printf("entrou no else\n");
         for (int k = 0; k < 8; k++) {
             int x = i + neighborX[k];
             int y = j + neighborY[k];
             arrNeighbors[k] = *whichGrid[x][y];
-
-            // printf("[%i][%i] = %f\n", x, y, *whichGrid[x][y]);
         }
     }
     for (int k = 0; k < 8; k++) {
-        // printf("arrNeighbors[%i] = %f\n", k, arrNeighbors[k]);
         amountLivingNeighbors += arrNeighbors[k];
     }
     return amountLivingNeighbors;
