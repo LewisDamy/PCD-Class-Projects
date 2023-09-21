@@ -90,21 +90,32 @@ int getNeighbors(float* whichGrid[DIMENSION][DIMENSION], int i, int j) {
     float arrNeighbors[8];
     int amountLivingNeighbors = 0;
 
+    // Relative positions of neighbors
+    int neighborX[] = {-1, -1, -1, 0, 0, 1, 1, 1};
+    int neighborY[] = {-1, 0, 1, -1, 1, -1, 0, 1};
+
     if (i == 0 || j == 0) {
-        printf("TODO\n");
+        // printf("entrou no if\n");
+        for (int k = 0; k < 8; k++) {
+            int x = (i + neighborX[k] + DIMENSION) % DIMENSION;
+            int y = (j + neighborY[k] + DIMENSION) % DIMENSION;
+            arrNeighbors[k] = *whichGrid[x][y];
+
+            // printf("[%i][%i] = %f\n", x, y, *whichGrid[x][y]);
+        }
     } else {
-        arrNeighbors[0] = *whichGrid[i - 1][j - 1];  // TOP LEFT ITEM
-        arrNeighbors[1] = *whichGrid[i - 1][j];      // TOP MIDDLE ITEM
-        arrNeighbors[2] = *whichGrid[i - 1][j + 1];  // TOP RIGHT ITEM
-        arrNeighbors[3] = *whichGrid[i][j - 1];      // LEFT ITEM
-        arrNeighbors[4] = *whichGrid[i][j + 1];      // RIGHT ITEM
-        arrNeighbors[5] = *whichGrid[i + 1][j - 1];  // BOTTOM LEFT ITEM
-        arrNeighbors[6] = *whichGrid[i + 1][j];      // BOTTOM MIDDLE ITEM
-        arrNeighbors[7] = *whichGrid[i + 1][j + 1];  // BOTTOM RIGHT ITEM
+        // printf("entrou no else\n");
+        for (int k = 0; k < 8; k++) {
+            int x = i + neighborX[k];
+            int y = j + neighborY[k];
+            arrNeighbors[k] = *whichGrid[x][y];
+
+            // printf("[%i][%i] = %f\n", x, y, *whichGrid[x][y]);
+        }
     }
-    // loop to make the math
-    for (int i = 0; i < 8; i++) {
-        amountLivingNeighbors += arrNeighbors[i];
+    for (int k = 0; k < 8; k++) {
+        // printf("arrNeighbors[%i] = %f\n", k, arrNeighbors[k]);
+        amountLivingNeighbors += arrNeighbors[k];
     }
     return amountLivingNeighbors;
 }
@@ -116,8 +127,7 @@ int main() {
 
     // printf("cell value: %f\n", *originalGrid[0][1]);
 
-    // TODO
-    int result = getNeighbors(originalGrid, 0, 1);
+    int result = getNeighbors(originalGrid, 1, 2);
     printf("result: %i\n", result);
 
     return 0;
