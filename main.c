@@ -3,10 +3,29 @@
 
 #define DIMENSION 50
 #define ITERATIONS 10
+#define THREADS 2
 
 // Define the original and copy grids as global 2D arrays of float pointers
 float* originalGrid[DIMENSION][DIMENSION];
 float* copyGrid[DIMENSION][DIMENSION];
+
+void startThreads() {
+    // TODO
+}
+
+// Function to partition the grid and return an array of partition boundaries
+void partitionGrid(int partitionBoundaries[][2]) {
+    // Calculate the size of each partition in rows
+    int partitionSize = DIMENSION / THREADS;
+
+    for (int t = 0; t < THREADS; t++) {
+        // Calculate the starting and ending row indices for this partition
+        partitionBoundaries[t][0] = t * partitionSize;  // Start row
+        partitionBoundaries[t][1] = (t == THREADS - 1)
+                                        ? DIMENSION
+                                        : (t + 1) * partitionSize;  // End row
+    }
+}
 
 void initGrid(float* grid[DIMENSION][DIMENSION]) {
     // Allocate memory for the grid
@@ -100,14 +119,14 @@ int getNeighbors(float* whichGrid[DIMENSION][DIMENSION], int i, int j) {
             int x = (i + neighborX[k] + DIMENSION) % DIMENSION;
             int y = (j + neighborY[k] + DIMENSION) % DIMENSION;
             arrNeighbors[k] = *whichGrid[x][y];
-            printf("[%i][%i] = %f\n", x, y, *whichGrid[x][y]);
+            // printf("[%i][%i] = %f\n", x, y, *whichGrid[x][y]);
         }
     } else {
         for (int k = 0; k < 8; k++) {
             int x = i + neighborX[k];
             int y = j + neighborY[k];
             arrNeighbors[k] = *whichGrid[x][y];
-            printf("[%i][%i] = %f\n", x, y, *whichGrid[x][y]);
+            // printf("[%i][%i] = %f\n", x, y, *whichGrid[x][y]);
         }
     }
     for (int k = 0; k < 8; k++) {
@@ -159,7 +178,6 @@ void validateGameRules(float* readGrid[DIMENSION][DIMENSION],
 }
 
 void lifeGameIterator() {
-    // TODO
     //
     /* Rule based on topic 4.
        Crie um laço de repetição para executar um determinado número máximo de
@@ -167,6 +185,9 @@ void lifeGameIterator() {
        do tabuleiro que devem ser geradas.
      */
     // USE VARIABLE: ITERATIONS (defined at line 5)
+    for (int iteration = 0; iteration < ITERATIONS; iteration++) {
+        // TODO
+    }
 }
 
 int main() {
@@ -183,6 +204,18 @@ int main() {
 
     printf("living cells after rules applied: %i\n",
            countLivingCells(copyGrid));
+
+    // Array partition for each [thread][0] -> (start) / [thread][1] -> (end)
+    int partitionBoundaries[THREADS][2];
+
+    // Call the partitionGrid function to calculate and store partition
+    partitionGrid(partitionBoundaries);
+
+    // Print the partition boundaries for visualization
+    for (int t = 0; t < THREADS; t++) {
+        printf("Partition %d: Start Row = %d, End Row = %d\n", t,
+               partitionBoundaries[t][0], partitionBoundaries[t][1]);
+    }
 
     return 0;
 }
