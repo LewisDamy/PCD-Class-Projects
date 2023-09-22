@@ -100,12 +100,14 @@ int getNeighbors(float* whichGrid[DIMENSION][DIMENSION], int i, int j) {
             int x = (i + neighborX[k] + DIMENSION) % DIMENSION;
             int y = (j + neighborY[k] + DIMENSION) % DIMENSION;
             arrNeighbors[k] = *whichGrid[x][y];
+            printf("[%i][%i] = %f\n", x, y, *whichGrid[x][y]);
         }
     } else {
         for (int k = 0; k < 8; k++) {
             int x = i + neighborX[k];
             int y = j + neighborY[k];
             arrNeighbors[k] = *whichGrid[x][y];
+            printf("[%i][%i] = %f\n", x, y, *whichGrid[x][y]);
         }
     }
     for (int k = 0; k < 8; k++) {
@@ -114,37 +116,44 @@ int getNeighbors(float* whichGrid[DIMENSION][DIMENSION], int i, int j) {
     return amountLivingNeighbors;
 }
 
-int countLivingCells(float* whichGrid[DIMENSION][DIMENSION], int i, int j) {
-    //  TODO
-    // For loop that iterate thought all the grid and returns the sum
-    // of += grid[i][j] value
-
+int countLivingCells(float* whichGrid[DIMENSION][DIMENSION]) {
     /* Rule based on topic 5.
         Crie um procedimento (ou trecho de código) que, ao finalizar todas as
         iterações/gerações, compute a quantidade de células vivas.
         ATENCAO: Considere que uma célula viva tem seu valor maior que zero.
     */
+    int livingCells = 0;
+    for (int x = 0; x < DIMENSION; x++) {
+        for (int y = 0; y < DIMENSION; y++) {
+            if (*whichGrid[x][y] > 0.0) {
+                livingCells++;
+            }
+        }
+    }
+    return livingCells;
 }
 
-void validateGameRules(float* grid[DIMENSION][DIMENSION], int x, int y) {
-   // se a célula está viva
-    if (*grid[x][y] > 0.0) {
+void validateGameRules(float* readGrid[DIMENSION][DIMENSION],
+                       float* writeGrid[DIMENSION][DIMENSION], int x, int y) {
+    // se a célula está viva
+    if (*readGrid[x][y] > 0.0) {
         // A. Células vivas com menos de 2 vizinhas vivas morrem por abandono
-        if (liveNeighbors < 2) {
-            *newGrid[x][y] = 0.0; // morte por abandono
+        if (getNeighbors(readGrid, x, y) < 2) {
+            *writeGrid[x][y] = 0.0;  // morte por abandono
         }
         // B. Células vivas com 2 ou 3 vizinhos devem permanecer vivas
-        else if (liveNeighbors == 2 || liveNeighbors == 3) {
-            *newGrid[x][y] = 1.0; // permanece viva
+        else if (getNeighbors(readGrid, x, y) == 2 ||
+                 getNeighbors(readGrid, x, y) == 3) {
+            *writeGrid[x][y] = 1.0;  // permanece viva
         }
         // C. Células vivas com 4 ou mais vizinhos morrem por superpopulação
-        else if (liveNeighbors >= 4) {
-            *newGrid[x][y] = 0.0; // morte por superpopulação
+        else if (getNeighbors(readGrid, x, y) >= 4) {
+            *writeGrid[x][y] = 0.0;  // morte por superpopulação
         }
     } else {
         // D. Célula morta com exatamente 3 vizinhos se tornam vivas
-        if (liveNeighbors == 3) {
-            *newGrid[x][y] = 1.0; // vive
+        if (getNeighbors(readGrid, x, y) == 3) {
+            *writeGrid[x][y] = 1.0;  // vive
         }
     }
 }
@@ -165,8 +174,15 @@ int main() {
     initGrid(originalGrid);
     initGrid(copyGrid);
 
-    int result = getNeighbors(originalGrid, 1, 2);
-    printf("result: %i\n", result);
+    // int result = getNeighbors(originalGrid, 3, 1);
+    // printf("result: %i\n", result);
+
+    printf("living cells in grid: %i\n", countLivingCells(copyGrid));
+
+    validateGameRules(originalGrid, copyGrid, 0, 1);
+
+    printf("living cells after rules applied: %i\n",
+           countLivingCells(copyGrid));
 
     return 0;
 }
