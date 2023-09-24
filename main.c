@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#define DIMENSION 100
-#define GENERATIONS 20
+#define DIMENSION 50
+#define GENERATIONS 5
 #define THREADS 4
 
 // Define the original and copy grids as global 2D arrays of float pointers
@@ -137,12 +137,17 @@ void validateGameRules(int x, int y)
 void *threadFunction(void *param)
 {
     struct ThreadParams *params = (struct ThreadParams *)param;
-
     // This code is executed concurrently
     // printf("Thread %d: Starting at: %d, Finishing at: %d\n", params->threadId,
     //       params->range[0][0], params->range[0][1]);
     // Chamada da função com os argumentos desejados
-    validateGameRules(params->range[0][0], params->range[0][1]);
+    for (int i = params->range[params->threadId][0]; i <= params->range[params->threadId][1]; i++)
+    {
+        for (int j = 0; j < DIMENSION; j++)
+        {
+            validateGameRules(i, j);
+        }
+    }
     // validateGameRules(args[0], args[1], 0, 1);
 
     // Retornando NULL (ou algum outro valor se necessário)
