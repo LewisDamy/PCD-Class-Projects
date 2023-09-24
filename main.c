@@ -297,6 +297,7 @@ int lifeGameIterator()
 
     for (int iteration = 0; iteration < GENERATIONS; iteration++)
     {
+        printf("---GENERATION %d---\n", iteration + 1);
         threadCreateExec(params);
         // copyCopyToOriginal();
         countLivingCells(originalGrid);
