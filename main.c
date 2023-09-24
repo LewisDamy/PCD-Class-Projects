@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#define DIMENSION 50
-#define GENERATIONS 5
+#define DIMENSION 100
+#define GENERATIONS 20
 #define THREADS 4
 
 // Define the original and copy grids as global 2D arrays of float pointers
@@ -20,21 +20,136 @@ void startThreads()
     // TODO
 }
 
+int getNeighbors(int lin, int col) // x, y de uma celula
+{
+    int amountLivingNeighbors = 0;
+    int auxNeighborX[] = {lin - 1, lin - 1, lin - 1, lin, lin, lin + 1, lin + 1, lin + 1};
+    int auxNeighborY[] = {col - 1, col, col + 1, col - 1, col + 1, col - 1, col, col + 1};
+
+    if (lin == (DIMENSION - 1) || lin == 0)
+    {
+        if (col == (DIMENSION - 1) && lin == (DIMENSION - 1))
+        { // vertice direto inferior
+            auxNeighborX[5] = 0;
+            auxNeighborX[6] = 0;
+            auxNeighborX[7] = 0;
+            auxNeighborY[3] = 0;
+            auxNeighborY[5] = 0;
+            auxNeighborY[8] = 0;
+        }
+        else if (col == 0 && lin == (DIMENSION - 1))
+        { // vertice esquerdo inferior
+            auxNeighborX[7] = 0;
+            auxNeighborX[8] = 0;
+            auxNeighborY[0] = DIMENSION - 1;
+            auxNeighborY[3] = DIMENSION - 1;
+        }
+        else if (col == (DIMENSION - 1) && lin == 0)
+        { // vertice direito superior
+            auxNeighborX[0] = DIMENSION - 1;
+            auxNeighborX[1] = DIMENSION - 1;
+            auxNeighborX[2] = DIMENSION - 1;
+            auxNeighborY[2] = 0;
+            auxNeighborY[6] = 0;
+            auxNeighborY[7] = 0;
+        }
+        else if (col == 0 && lin == 0)
+        { // vertice esquerdo superior
+            auxNeighborX[0] = DIMENSION - 1;
+            auxNeighborX[1] = DIMENSION - 1;
+            auxNeighborX[2] = DIMENSION - 1;
+            auxNeighborY[0] = DIMENSION - 1;
+            auxNeighborY[3] = DIMENSION - 1;
+            auxNeighborY[4] = col - 1;
+            auxNeighborY[5] = DIMENSION - 1;
+        }
+        else if (lin == (DIMENSION - 1))
+        { // qualquer coluna interna da ultima linha
+            auxNeighborX[5] = 0;
+            auxNeighborX[6] = 0;
+            auxNeighborX[7] = 0;
+        }
+        else if (lin == 0)
+        { // qualquer coluna interna da primeira linha
+            auxNeighborX[0] = DIMENSION - 1;
+            auxNeighborX[1] = DIMENSION - 1;
+            auxNeighborX[2] = DIMENSION - 1;
+        }
+    }
+    else if (col == 0)
+    {
+        auxNeighborY[0] = DIMENSION - 1;
+        auxNeighborY[3] = DIMENSION - 1;
+        auxNeighborY[5] = DIMENSION - 1;
+    }
+    else if (col == DIMENSION - 1)
+    {
+        auxNeighborY[2] = 0;
+        auxNeighborY[4] = 0;
+        auxNeighborY[7] = 0;
+    }
+
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if (*originalGrid[auxNeighborX[i]][auxNeighborY[j]] > 0)
+            {
+                amountLivingNeighbors++;
+            }
+        }
+    }
+    return amountLivingNeighbors;
+}
+
+void validateGameRules(int x, int y)
+{
+    // se a célula está viva
+    if (*originalGrid[x][y] > 0.0)
+    {
+        printf("vizinhos %d\n", getNeighbors(x, y));
+        // A. Células vivas com menos de 2 vizinhas vivas morrem por abandono
+        if (getNeighbors(x, y) < 2)
+        {
+            *copyGrid[x][y] = 0.0; // morte por abandono
+        }
+        // B. Células vivas com 2 ou 3 vizinhos devem permanecer vivas
+        else if (getNeighbors(x, y) == 2 ||
+                 getNeighbors(x, y) == 3)
+        {
+            *copyGrid[x][y] = 1.0; // permanece viva
+        }
+        // C. Células vivas com 4 ou mais vizinhos morrem por superpopulação
+        else if (getNeighbors(x, y) >= 4)
+        {
+            *copyGrid[x][y] = 0.0; // morte por superpopulação
+        }
+    }
+    else
+    {
+        printf("vizinhos %d\n", getNeighbors(x, y));
+        // D. Célula morta com exatamente 3 vizinhos se tornam vivas
+        if (getNeighbors(x, y) == 3)
+            *copyGrid[x][y] = 1.0; // vive
+    }
+}
+
 void *threadFunction(void *param)
 {
     struct ThreadParams *params = (struct ThreadParams *)param;
 
     // This code is executed concurrently
-    printf("Thread %d: Starting at: %d, Finishing at: %d\n", params->threadId,
-           params->range[0][0], params->range[0][1]);
+    // printf("Thread %d: Starting at: %d, Finishing at: %d\n", params->threadId,
+    //       params->range[0][0], params->range[0][1]);
     // Chamada da função com os argumentos desejados
+    validateGameRules(params->range[0][0], params->range[0][1]);
     // validateGameRules(args[0], args[1], 0, 1);
 
     // Retornando NULL (ou algum outro valor se necessário)
     pthread_exit(NULL);
 }
 
-void threadCreateExec(threadParams params[THREADS])
+void threadCreateExec(threadParams params[THREADS]) // params possui ID, linha de começo e fim
 {
     pthread_t threads[THREADS];
     for (int t = 0; t < THREADS; t++)
@@ -175,50 +290,6 @@ void printCell(float *whichGrid[DIMENSION][DIMENSION], int i, int j)
     printf("cell value: %0.1f\n", *whichGrid[0][1]);
 }
 
-int getNeighbors(float *whichGrid[DIMENSION][DIMENSION], int i, int j)
-{
-    float arrNeighbors[8];
-    int amountLivingNeighbors = 0;
-
-    // Relative positions of neighbors
-    int neighborX[] = {-1, -1, -1, 0, 0, 1, 1, 1};
-    int neighborY[] = {-1, 0, 1, -1, 1, -1, 0, 1};
-
-    for (int k = 0; k < 8; k++)
-    {
-        int x = i + neighborX[k];
-        int y = j + neighborY[k];
-
-        // Condicao pra verificar se estamos em alguma das bordas do tabuleiro
-        if (x < 0)
-        {
-            x = DIMENSION - 1; // Vizinho na borda superior
-        }
-        else if (x >= DIMENSION)
-        {
-            x = 0; // Vizinho na borda inferior
-        }
-
-        if (y < 0)
-        {
-            y = DIMENSION - 1; // Vizinho na borda esquerda
-        }
-        else if (y >= DIMENSION)
-        {
-            y = 0; // Vizinho na borda direita
-        }
-
-        arrNeighbors[k] = *whichGrid[x][y]; // Verifica o valor da célula (x, y) após o ajuste e o armazena no array
-    }
-
-    for (int k = 0; k < 8; k++)
-    {
-        amountLivingNeighbors += arrNeighbors[k];
-    }
-
-    return amountLivingNeighbors;
-}
-
 int countLivingCells(float *whichGrid[DIMENSION][DIMENSION])
 {
     /* Rule based on topic 5.
@@ -238,39 +309,6 @@ int countLivingCells(float *whichGrid[DIMENSION][DIMENSION])
         }
     }
     return livingCells;
-}
-
-void validateGameRules(float *readGrid[DIMENSION][DIMENSION],
-                       float *writeGrid[DIMENSION][DIMENSION], int x, int y)
-{
-    // se a célula está viva
-    if (*readGrid[x][y] > 0.0)
-    {
-        // A. Células vivas com menos de 2 vizinhas vivas morrem por abandono
-        if (getNeighbors(readGrid, x, y) < 2)
-        {
-            *writeGrid[x][y] = 0.0; // morte por abandono
-        }
-        // B. Células vivas com 2 ou 3 vizinhos devem permanecer vivas
-        else if (getNeighbors(readGrid, x, y) == 2 ||
-                 getNeighbors(readGrid, x, y) == 3)
-        {
-            *writeGrid[x][y] = 1.0; // permanece viva
-        }
-        // C. Células vivas com 4 ou mais vizinhos morrem por superpopulação
-        else if (getNeighbors(readGrid, x, y) >= 4)
-        {
-            *writeGrid[x][y] = 0.0; // morte por superpopulação
-        }
-    }
-    else
-    {
-        // D. Célula morta com exatamente 3 vizinhos se tornam vivas
-        if (getNeighbors(readGrid, x, y) == 3)
-        {
-            *writeGrid[x][y] = 1.0; // vive
-        }
-    }
 }
 
 void setThreadsParameters(int partitionBoundaries[THREADS][2], threadParams params[THREADS])
@@ -299,8 +337,8 @@ int lifeGameIterator()
     {
         printf("---GENERATION %d---\n", iteration + 1);
         threadCreateExec(params);
-        // copyCopyToOriginal();
-        countLivingCells(originalGrid);
+        copyCopyToOriginal();
+        printf("living cells: %d\n", countLivingCells(originalGrid));
     }
     return 0;
 }
