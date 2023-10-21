@@ -40,7 +40,10 @@ void *client(void *arg)
       res[client_id - 1] = 0;
     }
     else
+    {
       criticalSection(client_id);
+      Sleep(rand() % 2);
+    }
   }
   pthread_exit(NULL);
 }
@@ -90,12 +93,11 @@ void threadsCreator()
   printf("All threads joined\n");
 }
 
-int main(int argc, char *argv[])
+int main()
 {
-  if (argc > 1)
-  {
-    protect = atoi(argv[1]);
-  }
+  printf("Insert 1 (enforce critial area) or 0 (mutual access)\n");
+  printf("press ctrl+c to exit the loop\n");
+  scanf("%d", &protect);
   protect == 1 ? printf("Acesso restrito a sessao critica\n") : printf("Acesso concorrente a sessao critica\n");
   arrInit();
   threadsCreator();
