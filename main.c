@@ -356,12 +356,14 @@ int lifeGameIterator()
 
     for (int iteration = 0; iteration < GENERATIONS; iteration++)
     {
-        printf("---GENERATION %d---\n", iteration + 1);
+        if (iteration < 6 || iteration == GENERATIONS - 1)
+            printf("---GENERATION %d---\n", iteration + 1);
         threadCreateExec(params);
         // printf("1 done!\n");
         copyCopyToOriginal();
         // printf("2 done!\n");
-        printf("living cells: %d\n", countLivingCells(originalGrid));
+        if (iteration < 6 || iteration == GENERATIONS - 1)
+            printf("living cells: %d\n", countLivingCells(originalGrid));
     }
     return 0;
 }
