@@ -31,9 +31,9 @@ int getNeighbors(int lin, int col) // x, y de uma celula
         if (col == (DIMENSION - 1) && lin == (DIMENSION - 1))
         { // vertice direto inferior
             // printf("Vertice direto inferior\n");
-            auxNeighborX[5] = 0;
-            auxNeighborX[6] = 0;
-            auxNeighborX[7] = 0;
+            auxNeighborX[0] = 0;
+            auxNeighborX[1] = 0;
+            auxNeighborX[2] = 0;
             auxNeighborY[2] = 0;
             auxNeighborY[4] = 0;
             auxNeighborY[7] = 0;
@@ -103,8 +103,6 @@ int getNeighbors(int lin, int col) // x, y de uma celula
         return -1;
     }
     else
-        // printf("ponto interno: %d, %d\n", lin, col);
-
         for (int i = 0; i < 8; i++)
         {
             if (*originalGrid[auxNeighborX[i]][auxNeighborY[i]] > 0)
@@ -121,29 +119,20 @@ void validateGameRules(int x, int y)
     if (*originalGrid[x][y] > 0.0)
     {
         // A. Células vivas com menos de 2 vizinhas vivas morrem por abandono
-        if (getNeighbors(x, y) < 2)
+        if (getNeighbors(x, y) < 2 || getNeighbors(x, y) > 3)
         {
             *copyGrid[x][y] = 0.0; // morte por abandono
         }
-        // B. Células vivas com 2 ou 3 vizinhos devem permanecer vivas
-        else if (getNeighbors(x, y) == 2 ||
-                 getNeighbors(x, y) == 3)
-        {
-            *copyGrid[x][y] = 1.0; // permanece viva
-        }
-        // C. Células vivas com 4 ou mais vizinhos morrem por superpopulação
-        else if (getNeighbors(x, y) >= 4)
-        {
-            *copyGrid[x][y] = 0.0; // morte por superpopulação
-        }
+        else
+            *copyGrid[x][y] = 1.0;
     }
     else
     {
-        // D. Célula morta com exatamente 3 vizinhos se tornam vivas
         if (getNeighbors(x, y) == 3)
-            *copyGrid[x][y] = 1.0; // vive
+            *copyGrid[x][y] = 1.0;
+        else
+            *copyGrid[x][y] = 0.0;
     }
-    // printf("vizinhos %d x: %d e Y: %d\n", getNeighbors(x, y), x, y);
 }
 
 void *threadFunction(void *param)
@@ -234,7 +223,7 @@ void initGrid(float *grid[DIMENSION][DIMENSION])
     }
 
     // GLIDER INIT
-    int line = 0, column = 0;
+    int line = 1, column = 1;
 
     *grid[line][column + 1] = 1.0;
     *grid[line + 1][column + 2] = 1.0;
@@ -243,7 +232,7 @@ void initGrid(float *grid[DIMENSION][DIMENSION])
     *grid[line + 2][column + 2] = 1.0;
 
     // R-pentomino INIT
-    line = 9, column = 29;
+    line = 10, column = 30;
 
     *grid[line][column + 1] = 1.0;
     *grid[line][column + 2] = 1.0;
@@ -252,7 +241,7 @@ void initGrid(float *grid[DIMENSION][DIMENSION])
     *grid[line + 2][column + 1] = 1.0;
 }
 
-void displayGrid(float *grid[DIMENSION][DIMENSION])
+void displayGrid()
 {
     FILE *file = fopen("display.txt", "w");
 
@@ -274,7 +263,7 @@ void displayGrid(float *grid[DIMENSION][DIMENSION])
         fprintf(file, "[%02d]  ", i);
         for (int j = 1; j <= DIMENSION; j++)
         {
-            fprintf(file, "%.1f   ", *grid[i - 1][j - 1]);
+            fprintf(file, "%.1f   ", *originalGrid[i - 1][j - 1]);
         }
         fprintf(file, "\n");
     }
@@ -350,42 +339,30 @@ int lifeGameIterator()
     int partitionBoundaries[THREADS][2]; // Array partition for each [thread][0] -> (start) / [thread][1] -> (end)
     malloc(THREADS * sizeof(struct ThreadParams));
 
-    partitionGrid(partitionBoundaries);  // Call the partitionGrid function to calculate and store partition
-    printPartition(partitionBoundaries); // Print the partition boundaries for visualization
+    partitionGrid(partitionBoundaries); // Call the partitionGrid function to calculate and store partition
+    // printPartition(partitionBoundaries); // Print the partition boundaries for visualization
     setThreadsParameters(partitionBoundaries, params);
-
-    for (int iteration = 0; iteration < GENERATIONS; iteration++)
+    int iteration;
+    for (iteration = 0; iteration < GENERATIONS; iteration++)
     {
-        if (iteration < 6 || iteration == GENERATIONS - 1)
-            printf("---GENERATION %d---\n", iteration + 1);
         threadCreateExec(params);
         // printf("1 done!\n");
         copyCopyToOriginal();
         // printf("2 done!\n");
-        if (iteration < 6 || iteration == GENERATIONS - 1)
-            printf("living cells: %d\n", countLivingCells(originalGrid));
+        // if (iteration < 6 || iteration == GENERATIONS - 1)
+        //    printf("---GENERATION %d---\nliving cells: %d\n", countLivingCells(originalGrid));
+        if (iteration < 999)
+            printf("---GENERATION %d--- living cells: %d\n", iteration, countLivingCells(originalGrid));
     }
     return 0;
 }
 
 int main()
 {
-    // Initialize the original and copy grids
     initGrid(originalGrid);
     initGrid(copyGrid);
+    printf("Condicao inicial: %d\n", countLivingCells(originalGrid));
+    displayGrid();
     lifeGameIterator();
-    /*printf("direito superior: %d\n", getNeighbors(0, 49));
-    printf("direito inferior: %d\n", getNeighbors(49, 49));
-    printf("esquerdo superior: %d\n", getNeighbors(0, 0));
-    printf("esquerdo inferior: %d\n", getNeighbors(49, 0));
-    printf("qlqr linha coluna esquerda: %d\n", getNeighbors(20, 0));
-    printf("qlqr linha coluna direita: %d\n", getNeighbors(20, 49));
-    printf("qlqr coluna linha superior: %d\n", getNeighbors(0, 20));
-    printf("qlqr coluna linha inferior: %d\n", getNeighbors(49, 20));
-    printf("living cells after rules applied: %i\n", countLivingCells(copyGrid));
-    */
-    // int result = getNeighbors(originalGrid, 3, 1);
-    // printf("result: %i\n", result);
-    // printf("living cells in grid: %i\n", countLivingCells(copyGrid));
     return 0;
 }
